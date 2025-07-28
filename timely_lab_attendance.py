@@ -2,7 +2,7 @@
 """
 Created on Sun Jul 27 11:20:10 2025
 
-@author: mnn0073
+@author: Drew Ritcher
 """
 
 import openpyxl
@@ -10,7 +10,7 @@ import openpyxl
 
 
 def select_active_tab(workbook, tab_name):
-    workbook.active = workbook[tab_name]  
+    workbook.active = workbook[tab_name]
 
 
     
@@ -58,9 +58,8 @@ workbook = load_workbook(filename="combined_labexercises_TEST.xlsx")
 main_student_hash = {}
 
 #print("Excel tab names: " + " ".join(str(s) for s in workbook.sheetnames))
+#print(active_sheet_headers) #class name is .__class__.__name__
 
-
-# TODO: for loop to iterate through sheets here
 
 for wb_tab in workbook.sheetnames:
     select_active_tab(workbook, wb_tab)
@@ -72,15 +71,19 @@ for wb_tab in workbook.sheetnames:
     header_row = active_sheet[1]
     active_sheet_headers = [cell.value for cell in header_row]
     
-    
-    #print(active_sheet_headers) #class name is .__class__.__name__
-    #print(active_sheet.max_column) #12
 
     calculate_number_of_labs_attended(active_sheet, wb_tab)
+    print(main_student_hash)
 
 # ====
 
+#TODO: Create code for 'combined' tab and apply Megans nested if logic
 
-print(main_student_hash)
+workbook.create_sheet("combined", 0)
+select_active_tab(workbook, "combined")
+
+
+
+# ====
 
 workbook.save(filename="combined_labexercises_TEST.xlsx")
