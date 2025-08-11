@@ -59,6 +59,45 @@ def calculate_number_of_labs_attended(active_sheet, tab_name):
     return main_student_hash
 
 
+def lab_attendance_detection_after_first_lab(num_labs_attended):
+    if num_labs_attended < 1:
+        return 1
+    else:
+        return 0
+    
+    
+def lab_attendance_detection_after_second_lab(num_labs_attended):
+    if num_labs_attended < 1:
+        return 2
+    elif num_labs_attended < 2:
+        return 1
+    else:
+        return 0
+    
+    
+def lab_attendance_detection_after_third_lab(num_labs_attended):
+    if num_labs_attended < 1:
+        return 3
+    elif num_labs_attended < 2:
+        return 2
+    elif num_labs_attended < 3:
+        return 1
+    else:
+        return 0
+    
+    
+def lab_attendance_detection_after_fourth_lab(num_labs_attended):
+    if num_labs_attended < 1:
+        return 4
+    elif num_labs_attended < 2:
+        return 3
+    elif num_labs_attended < 3:
+        return 2
+    elif num_labs_attended < 4:
+        return 1
+    else:
+        return 0
+
 
 
 # Execution
@@ -76,14 +115,14 @@ for wb_tab in workbook.sheetnames:
     select_active_tab(workbook, wb_tab)
     active_sheet = workbook.active
     
-    print ("Excel tab title: " + active_sheet.title)
+    #print ("Excel tab title: " + active_sheet.title)
     
     header_row = active_sheet[1]
     active_sheet_headers = [cell.value for cell in header_row]
     
 
     calculate_number_of_labs_attended(active_sheet, wb_tab)
-    print(main_student_hash)
+    #print(main_student_hash)
 
 # ====
 
@@ -93,11 +132,71 @@ if "combined" not in active_sheet_headers:
     workbook.create_sheet("combined", 0)
     
 select_active_tab(workbook, "combined")
+workbook.active.cell(row=1, column=1).value = "Student"
+workbook.active.cell(row=1, column=2).value = "ID"
+workbook.active.cell(row=1, column=3).value = "SIS User ID"
+workbook.active.cell(row=1, column=4).value = "SIS Login ID"
+workbook.active.cell(row=1, column=5).value = "Root Account"
+workbook.active.cell(row=1, column=6).value = "Section"
 
 
+all_lab_dates = workbook.sheetnames
+all_lab_dates.remove('combined')
+
+key_lab_dates = ['2-15', '3-8', '4-5', '4-26']
+
+for index, lab in enumerate(all_lab_dates):
+    workbook.active.cell(row=1, column=7 + index).value = lab
 
 
+student_index = 2
 
+for key, value in main_student_hash.items():
+    total_semester_lab_grade = 20
+    num_of_missing_labs = 0
+    
+    workbook.active.cell(row=student_index, column=1).value = value['student']
+    workbook.active.cell(row=student_index, column=2).value = key
+    workbook.active.cell(row=student_index, column=3).value = value['sis_user_id']
+    workbook.active.cell(row=student_index, column=4).value = value['sis_login_id']
+    workbook.active.cell(row=student_index, column=5).value = value['root_account']
+    workbook.active.cell(row=student_index, column=6).value = value['section']
+    
+    current_lab_attendance_detection_formula = 0
+    for index, lab in enumerate(all_lab_dates):
+        workbook.active.cell(row=1, column=7 + index).value = lab + ' labs'
+        #print(value['student'] + " - " + lab)
+        
+        if lab not in value:
+            workbook.active.cell(row=student_index, column=7 + index).value = -100
+            continue
+        
+        if lab in key_lab_dates:
+            if key_lab_dates.index(lab) == 0:
+                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_first_lab(value[lab][lab + ' # of labs attended'])
+                current_lab_attendance_detection_formula = 0
+            elif key_lab_dates.index(lab) == 1:
+                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_second_lab(value[lab][lab + ' # of labs attended'])
+                current_lab_attendance_detection_formula = 1
+            elif key_lab_dates.index(lab) == 2:
+                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_third_lab(value[lab][lab + ' # of labs attended'])
+                current_lab_attendance_detection_formula = 2
+            elif key_lab_dates.index(lab) == 3:
+                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_fourth_lab(value[lab][lab + ' # of labs attended'])
+                current_lab_attendance_detection_formula = 3
+        else:
+            if current_lab_attendance_detection_formula == 0:
+                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_first_lab(value[lab][lab + ' # of labs attended'])
+            elif current_lab_attendance_detection_formula == 1:
+                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_second_lab(value[lab][lab + ' # of labs attended'])
+            elif current_lab_attendance_detection_formula == 2:
+                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_third_lab(value[lab][lab + ' # of labs attended'])
+            elif current_lab_attendance_detection_formula == 3:
+                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_fourth_lab(value[lab][lab + ' # of labs attended'])
+         
+        workbook.active.cell(row=student_index, column=7 + index).value = total_semester_lab_grade
+        
+    student_index = student_index + 1
 
 # ====
 
