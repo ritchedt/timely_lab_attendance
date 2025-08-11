@@ -16,6 +16,8 @@ def select_active_tab(workbook, tab_name):
     
 
 def calculate_number_of_labs_attended(active_sheet, tab_name):
+    number_of_labs_column = 0
+    
     for row in range(2, active_sheet.max_row + 1):
         lab_participation = 0
         student_name = active_sheet["A" + str(row)].value
@@ -33,8 +35,17 @@ def calculate_number_of_labs_attended(active_sheet, tab_name):
         
         main_student_hash[active_sheet["B" + str(row)].value][tab_name] = {}
         
-        for column in range(6, active_sheet.max_column):
-            grade = active_sheet.cell(row=row, column=column+1).value
+        if tab_name not in active_sheet.cell(row=1, column=active_sheet.max_column).value:
+            number_of_labs_column = active_sheet.max_column + 1
+            active_sheet.cell(row=1, column=number_of_labs_column).value = active_sheet.title + " # of labs attended"
+            
+            active_sheet_headers.insert(number_of_labs_column, active_sheet.title + " # of labs attended")
+        else:
+            number_of_labs_column = active_sheet.max_column
+            
+        
+        for column in range(7, number_of_labs_column):
+            grade = active_sheet.cell(row=row, column=column).value
             main_student_hash[active_sheet["B" + str(row)].value][tab_name][active_sheet_headers[column]] = grade
 
             if grade is not None:
@@ -42,7 +53,7 @@ def calculate_number_of_labs_attended(active_sheet, tab_name):
                     lab_participation += 1
         
         
-        active_sheet.cell(row=row, column=active_sheet.max_column).value = lab_participation
+        active_sheet.cell(row=row, column=number_of_labs_column).value = lab_participation
         main_student_hash[active_sheet["B" + str(row)].value][tab_name][active_sheet_headers[column]] = lab_participation
         
     return main_student_hash
@@ -67,7 +78,6 @@ for wb_tab in workbook.sheetnames:
     
     print ("Excel tab title: " + active_sheet.title)
     
-    active_sheet.cell(row=1, column=active_sheet.max_column + 1).value = active_sheet.title + " # of labs attended"
     header_row = active_sheet[1]
     active_sheet_headers = [cell.value for cell in header_row]
     
@@ -79,8 +89,13 @@ for wb_tab in workbook.sheetnames:
 
 #TODO: Create code for 'combined' tab and apply Megans nested if logic
 
-workbook.create_sheet("combined", 0)
+if "combined" not in active_sheet_headers:
+    workbook.create_sheet("combined", 0)
+    
 select_active_tab(workbook, "combined")
+
+
+
 
 
 
