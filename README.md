@@ -2,6 +2,9 @@
 
 Helping to assist in determining a students lab attendance grade based
 
+## Download
+Download the project as a ZIP file by clicking the Code dropdown -> HTTPS tab -> Download ZIP
+
 ## To Run
 1. Open Spyder and load in timely_lab_attendance.py
 2. Drop excel file in the same directory as the python file
