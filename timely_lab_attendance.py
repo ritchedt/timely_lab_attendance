@@ -6,14 +6,11 @@ Created on Sun Jul 27 11:20:10 2025
 """
 
 import openpyxl
-        
 
 
 def select_active_tab(workbook, tab_name):
     workbook.active = workbook[tab_name]
 
-
-    
 
 def calculate_number_of_labs_attended(active_sheet, tab_name):
     number_of_labs_column = 0
@@ -100,33 +97,35 @@ def lab_attendance_detection_after_fourth_lab(num_labs_attended):
 
 
 
-# Execution
+# ============================================================================
+#  === Change the key lab dates and the excel file (with extension) here ====
+# ============================================================================
+
+key_lab_dates = ['2-15', '3-8', '4-5', '4-26']
+lab_excel_file = "combined_lab_exercises.xlsx"
+
+# ============================================================================
+# ============================================================================
+# ============================================================================
+
 
 from openpyxl import load_workbook
 
-workbook = load_workbook(filename="combined_labexercises_TEST.xlsx")
+workbook = load_workbook(filename=lab_excel_file)
 main_student_hash = {}
 
-#print("Excel tab names: " + " ".join(str(s) for s in workbook.sheetnames))
-#print(active_sheet_headers) #class name is .__class__.__name__
-
+if "combined" in workbook.sheetnames:
+    workbook.remove(workbook["combined"])
 
 for wb_tab in workbook.sheetnames:
     select_active_tab(workbook, wb_tab)
     active_sheet = workbook.active
     
-    #print ("Excel tab title: " + active_sheet.title)
-    
     header_row = active_sheet[1]
     active_sheet_headers = [cell.value for cell in header_row]
-    
 
     calculate_number_of_labs_attended(active_sheet, wb_tab)
-    #print(main_student_hash)
 
-# ====
-
-#TODO: Create code for 'combined' tab and apply Megans nested if logic
 
 if "combined" not in active_sheet_headers:
     workbook.create_sheet("combined", 0)
@@ -142,8 +141,6 @@ workbook.active.cell(row=1, column=6).value = "Section"
 
 all_lab_dates = workbook.sheetnames
 all_lab_dates.remove('combined')
-
-key_lab_dates = ['2-15', '3-8', '4-5', '4-26']
 
 for index, lab in enumerate(all_lab_dates):
     workbook.active.cell(row=1, column=7 + index).value = lab
@@ -163,9 +160,9 @@ for key, value in main_student_hash.items():
     workbook.active.cell(row=student_index, column=6).value = value['section']
     
     current_lab_attendance_detection_formula = 0
+    
     for index, lab in enumerate(all_lab_dates):
         workbook.active.cell(row=1, column=7 + index).value = lab + ' labs'
-        #print(value['student'] + " - " + lab)
         
         if lab not in value:
             workbook.active.cell(row=student_index, column=7 + index).value = -100
@@ -198,6 +195,6 @@ for key, value in main_student_hash.items():
         
     student_index = student_index + 1
 
-# ====
 
-workbook.save(filename="combined_labexercises_TEST.xlsx")
+workbook.save(filename=lab_excel_file)
+print("Excel file {} updated and saved".format(lab_excel_file))
