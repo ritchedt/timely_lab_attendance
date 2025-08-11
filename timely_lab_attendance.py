@@ -195,6 +195,9 @@ for key, value in main_student_hash.items():
         
     student_index = student_index + 1
 
+from datetime import datetime
 
-workbook.save(filename=lab_excel_file)
-print("Excel file {} updated and saved".format(lab_excel_file))
+new_file_created_name = datetime.today().strftime('%Y-%m-%d') + "_" + lab_excel_file
+
+workbook.save(filename=new_file_created_name)
+print("Excel file {} updated and saved".format(new_file_created_name))
