@@ -56,52 +56,19 @@ def calculate_number_of_labs_attended(active_sheet, tab_name):
     return main_student_hash
 
 
-def lab_attendance_detection_after_first_lab(num_labs_attended):
-    if num_labs_attended < 1:
-        return 1
-    else:
-        return 0
-    
-    
-def lab_attendance_detection_after_second_lab(num_labs_attended):
-    if num_labs_attended < 1:
-        return 2
-    elif num_labs_attended < 2:
-        return 1
-    else:
-        return 0
-    
-    
-def lab_attendance_detection_after_third_lab(num_labs_attended):
-    if num_labs_attended < 1:
-        return 3
-    elif num_labs_attended < 2:
-        return 2
-    elif num_labs_attended < 3:
-        return 1
-    else:
-        return 0
-    
-    
-def lab_attendance_detection_after_fourth_lab(num_labs_attended):
-    if num_labs_attended < 1:
+def lab_attendance_deduction_after_key_lab(num_labs_attended, expected_num_labs_attended):
+    if num_labs_attended < expected_num_labs_attended:
         return 4
-    elif num_labs_attended < 2:
-        return 3
-    elif num_labs_attended < 3:
-        return 2
-    elif num_labs_attended < 4:
-        return 1
     else:
         return 0
-
+    
 
 
 # ============================================================================
 #  === Change the key lab dates and the excel file (with extension) here ====
 # ============================================================================
 
-key_lab_dates = ['2-15', '3-8', '4-5', '4-26']
+key_lab_dates = ['2-15', '3-8', '4-5', '4-19', '4-26']
 lab_excel_file = "combined_lab_exercises.xlsx"
 
 # ============================================================================
@@ -159,7 +126,6 @@ for key, value in main_student_hash.items():
     workbook.active.cell(row=student_index, column=5).value = value['root_account']
     workbook.active.cell(row=student_index, column=6).value = value['section']
     
-    current_lab_attendance_detection_formula = 0
     
     for index, lab in enumerate(all_lab_dates):
         workbook.active.cell(row=1, column=7 + index).value = lab + ' labs'
@@ -169,28 +135,9 @@ for key, value in main_student_hash.items():
             continue
         
         if lab in key_lab_dates:
-            if key_lab_dates.index(lab) == 0:
-                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_first_lab(value[lab][lab + ' # of labs attended'])
-                current_lab_attendance_detection_formula = 0
-            elif key_lab_dates.index(lab) == 1:
-                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_second_lab(value[lab][lab + ' # of labs attended'])
-                current_lab_attendance_detection_formula = 1
-            elif key_lab_dates.index(lab) == 2:
-                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_third_lab(value[lab][lab + ' # of labs attended'])
-                current_lab_attendance_detection_formula = 2
-            elif key_lab_dates.index(lab) == 3:
-                total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_fourth_lab(value[lab][lab + ' # of labs attended'])
-                current_lab_attendance_detection_formula = 3
-        else:
-            if current_lab_attendance_detection_formula == 0:
-                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_first_lab(value[lab][lab + ' # of labs attended'])
-            elif current_lab_attendance_detection_formula == 1:
-                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_second_lab(value[lab][lab + ' # of labs attended'])
-            elif current_lab_attendance_detection_formula == 2:
-                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_third_lab(value[lab][lab + ' # of labs attended'])
-            elif current_lab_attendance_detection_formula == 3:
-                 total_semester_lab_grade = total_semester_lab_grade - lab_attendance_detection_after_fourth_lab(value[lab][lab + ' # of labs attended'])
-         
+            total_semester_lab_grade = total_semester_lab_grade - lab_attendance_deduction_after_key_lab(value[lab][lab + ' # of labs attended'], (key_lab_dates.index(lab) + 1))
+        
+                
         workbook.active.cell(row=student_index, column=7 + index).value = total_semester_lab_grade
         
     student_index = student_index + 1
