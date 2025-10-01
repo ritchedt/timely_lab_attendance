@@ -61,7 +61,13 @@ def lab_attendance_deduction_after_key_lab(num_labs_attended, expected_num_labs_
         return 4
     else:
         return 0
-    
+
+
+def lab_points_earned_by_deadline(num_labs_attended, expected_num_labs_attended):
+    if num_labs_attended >= expected_num_labs_attended:
+        return 4
+    else:
+        return 0
 
 
 # ============================================================================
@@ -106,12 +112,15 @@ workbook.active.cell(row=1, column=5).value = "Root Account"
 workbook.active.cell(row=1, column=6).value = "Section"
 
 
-all_lab_dates = workbook.sheetnames
-all_lab_dates.remove('combined')
+all_lab_sheetnames = workbook.sheetnames
+all_lab_sheetnames.remove('combined')
+all_lab_dates = []
 
-for index, lab in enumerate(all_lab_dates):
-    workbook.active.cell(row=1, column=7 + index).value = lab
-
+for index, lab in enumerate(all_lab_sheetnames):
+    all_lab_dates.append(lab)
+    if lab in key_lab_dates:
+        all_lab_dates.append('Points earned by ' + lab)
+    
 
 student_index = 2
 
@@ -129,16 +138,30 @@ for key, value in main_student_hash.items():
     
     for index, lab in enumerate(all_lab_dates):
         workbook.active.cell(row=1, column=7 + index).value = lab + ' labs'
+
         
-        if lab not in value:
+        if 'Points earned by' not in lab and lab not in value:
             workbook.active.cell(row=student_index, column=7 + index).value = -100
             continue
-        
+
+        if 'Points earned by' in lab:
+            lab_name = lab.replace('Points earned by ', '')
+            if lab_name not in value:
+                workbook.active.cell(row=student_index, column=7 + index).value = 'N/A'
+                continue
+            print(value['student'])
+            print(lab_name)
+            print(value[lab_name][lab_name + ' # of labs attended'])
+            print(key_lab_dates.index(lab_name) + 1)
+            workbook.active.cell(row=student_index, column=7 + index).value = lab_points_earned_by_deadline(value[lab_name][lab_name + ' # of labs attended'],
+                                                                                                                     (key_lab_dates.index(lab_name) + 1))
+            
         if lab in key_lab_dates:
-            total_semester_lab_grade = total_semester_lab_grade - lab_attendance_deduction_after_key_lab(value[lab][lab + ' # of labs attended'], (key_lab_dates.index(lab) + 1))
+            total_semester_lab_grade = total_semester_lab_grade - lab_attendance_deduction_after_key_lab(value[lab][lab + ' # of labs attended'],
+                                                                                                         (key_lab_dates.index(lab) + 1))
         
-                
-        workbook.active.cell(row=student_index, column=7 + index).value = total_semester_lab_grade
+        if 'Points earned by' not in lab:        
+            workbook.active.cell(row=student_index, column=7 + index).value = total_semester_lab_grade
         
     student_index = student_index + 1
 
