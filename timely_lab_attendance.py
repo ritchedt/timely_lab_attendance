@@ -144,15 +144,12 @@ for key, value in main_student_hash.items():
             workbook.active.cell(row=student_index, column=7 + index).value = -100
             continue
 
+
         if 'Points earned by' in lab:
             lab_name = lab.replace('Points earned by ', '')
             if lab_name not in value:
                 workbook.active.cell(row=student_index, column=7 + index).value = 'N/A'
                 continue
-            print(value['student'])
-            print(lab_name)
-            print(value[lab_name][lab_name + ' # of labs attended'])
-            print(key_lab_dates.index(lab_name) + 1)
             workbook.active.cell(row=student_index, column=7 + index).value = lab_points_earned_by_deadline(value[lab_name][lab_name + ' # of labs attended'],
                                                                                                                      (key_lab_dates.index(lab_name) + 1))
             
